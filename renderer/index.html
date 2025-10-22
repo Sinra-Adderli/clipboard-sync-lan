@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClipboardSync LAN</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-top">
+        <h1 data-i18n="appTitle">ClipboardSync</h1>
+        <div class="header-controls">
+          <select id="languageSelector" class="lang-select">
+            <option value="en">EN</option>
+            <option value="ru">RU</option>
+            <option value="jp">JP</option>
+          </select>
+          <button id="themeSwitcher" class="icon-btn" title="Toggle Theme">
+            <i data-feather="moon" class="theme-icon"></i>
+          </button>
+        </div>
+      </div>
+      <div class="status-bar">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText"></span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Mode Selection -->
+      <section class="section mode-section">
+        <h2 data-i18n="modeSelection">Mode Selection</h2>
+        <div class="mode-buttons">
+          <button class="mode-btn" id="serverModeBtn" data-mode="server">
+            <i data-feather="server" class="mode-icon"></i>
+            <span class="mode-label" data-i18n="serverMode">Server Mode</span>
+          </button>
+          <button class="mode-btn" id="clientModeBtn" data-mode="client">
+            <i data-feather="monitor" class="mode-icon"></i>
+            <span class="mode-label" data-i18n="clientMode">Client Mode</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Connection Settings -->
+      <section class="section settings-section">
+        <h2 data-i18n="connectionSettings">Connection Settings</h2>
+        <div class="form-group">
+          <label for="passwordInput">
+            <i data-feather="lock" class="input-icon"></i>
+            <span data-i18n="password">Password</span>
+          </label>
+          <input type="password" id="passwordInput" data-i18n-placeholder="passwordPlaceholder" placeholder="Enter sync password">
+        </div>
+        <div class="form-group" id="serverHostGroup" style="display: none;">
+          <label for="serverHostInput">
+            <i data-feather="server" class="input-icon"></i>
+            <span data-i18n="serverIp">Server IP</span>
+          </label>
+          <input type="text" id="serverHostInput" data-i18n-placeholder="serverIpPlaceholder" placeholder="192.168.1.100">
+        </div>
+        <div class="control-buttons">
+          <button class="btn btn-primary" id="startBtn">
+            <i data-feather="play" class="btn-icon"></i>
+            <span data-i18n="startSync">Start Sync</span>
+          </button>
+          <button class="btn btn-danger" id="stopBtn" disabled>
+            <i data-feather="square" class="btn-icon"></i>
+            <span data-i18n="stopSync">Stop Sync</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Options -->
+      <section class="section options-section">
+        <h2 data-i18n="options">Options</h2>
+        <div class="option-item">
+          <i data-feather="radio" class="option-icon"></i>
+          <span class="toggle-text" data-i18n="autoDiscovery">Auto-discovery</span>
+          <label class="toggle-label">
+            <input type="checkbox" id="autoDiscoveryToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="option-item">
+          <i data-feather="zap" class="option-icon"></i>
+          <span class="toggle-text" data-i18n="autoLaunch">Auto-launch</span>
+          <label class="toggle-label">
+            <input type="checkbox" id="autoLaunchToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Clipboard History -->
+      <section class="section history-section">
+        <div class="history-header">
+          <i data-feather="clipboard" class="section-icon"></i>
+          <h2 data-i18n="clipboardHistory">Clipboard History</h2>
+          <button class="btn-icon-only" id="clearHistoryBtn" title="Clear">
+            <i data-feather="trash-2"></i>
+          </button>
+        </div>
+        <div id="historyList" class="history-list">
+          <p class="empty-message" data-i18n="noHistory">No clipboard history yet...</p>
+        </div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="translations.js"></script>
+  <script src="renderer.js"></script>
+  <script>
+    // Инициализируем иконки Feather
+    if (typeof feather !== 'undefined') {
+      feather.replace();
+    }
+  </script>
+</body>
+</html>
