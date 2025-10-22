@@ -1,0 +1,9 @@
+/.DS_Store
+/assets
+/dist
+/main.js
+/node_modules
+/package-lock.json
+/package.json
+/renderer
+/src
