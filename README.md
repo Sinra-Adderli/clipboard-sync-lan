@@ -6,6 +6,8 @@ Cross-platform clipboard sync app for your local network. Share text and images 
 
 Ever wanted to copy something on your Mac and paste it on your Windows PC? Or vice versa? This app does exactly that. Works over your local network, everything's encrypted, and it's dead simple to use.
 
+<img width="408" height="665" alt="Снимок экрана 2025-10-23 в 02 36 32" src="https://github.com/user-attachments/assets/0a7357d1-953d-4f90-97e4-0d67bbcb9254" />
+
 ## Features
 
 - ✅ **Real-time clipboard sync** - Copy on one device, paste on another
