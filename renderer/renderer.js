@@ -21,6 +21,9 @@ class RendererApp {
 		this.setupIPCListeners();
 		this.updateStatus();
 		this.loadHistory();
+		
+		// Выбираем режим сервера по умолчанию
+		this.selectMode('server');
 	}
 	
 	/**

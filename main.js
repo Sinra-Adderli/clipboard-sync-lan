@@ -102,72 +102,11 @@ class ClipboardSyncApp {
 			this.mainWindow.show();
 		});
 		
-		// Открываем DevTools в режиме разработки
-		if (process.argv.includes('--dev')) {
-			this.mainWindow.webContents.openDevTools();
-		}
-		
-		// Горячие клавиши для отладки
-		this.setupDebugShortcuts();
-		
 		this.mainWindow.on('close', (event) => {
 			if (this.isRunning) {
 				event.preventDefault();
 				this.mainWindow.hide();
 			}
-		});
-	}
-	
-	/**
-	 * Настраивает горячие клавиши для отладки
-	 */
-	setupDebugShortcuts() {
-		const { globalShortcut } = require('electron');
-		
-		// Регистрируем глобальные горячие клавиши
-		app.whenReady().then(() => {
-			// F12 - открыть/закрыть DevTools
-			globalShortcut.register('F12', () => {
-				if (this.mainWindow.webContents.isDevToolsOpened()) {
-					this.mainWindow.webContents.closeDevTools();
-				} else {
-					this.mainWindow.webContents.openDevTools();
-				}
-			});
-			
-			// Cmd/Ctrl + Shift + I - альтернатива для DevTools
-			globalShortcut.register('CommandOrControl+Shift+I', () => {
-				if (this.mainWindow.webContents.isDevToolsOpened()) {
-					this.mainWindow.webContents.closeDevTools();
-				} else {
-					this.mainWindow.webContents.openDevTools();
-				}
-			});
-			
-			// Cmd/Ctrl + R - перезагрузить окно
-			globalShortcut.register('CommandOrControl+R', () => {
-				this.mainWindow.reload();
-			});
-			
-			// Cmd/Ctrl + Shift + R - жесткая перезагрузка
-			globalShortcut.register('CommandOrControl+Shift+R', () => {
-				this.mainWindow.webContents.reloadIgnoringCache();
-			});
-			
-			// F11 - полноэкранный режим
-			globalShortcut.register('F11', () => {
-				this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
-			});
-			
-			// Cmd/Ctrl + Shift + D - переключить стиль панели заголовка
-			globalShortcut.register('CommandOrControl+Shift+D', () => {
-				this.toggleTitleBarStyle();
-			});
-		});
-		
-		// Отменяем регистрацию при выходе
-		app.on('will-quit', () => {
-			globalShortcut.unregisterAll();
 		});
 	}
 	
@@ -253,6 +192,7 @@ class ClipboardSyncApp {
 				label: 'Show Window',
 				click: () => {
 					this.mainWindow.show();
+					this.mainWindow.focus();
 				}
 			},
 			{ type: 'separator' },
@@ -333,16 +273,6 @@ class ClipboardSyncApp {
 		// Get discovered servers
 		ipcMain.handle('get-discovered-servers', async () => {
 			return this.udpDiscovery.getDiscoveredServers();
-		});
-		
-		// Debug controls
-		ipcMain.handle('toggle-dev-tools', async () => {
-			if (this.mainWindow.webContents.isDevToolsOpened()) {
-				this.mainWindow.webContents.closeDevTools();
-			} else {
-				this.mainWindow.webContents.openDevTools();
-			}
-			return true;
 		});
 		
 		ipcMain.handle('reload-window', async () => {

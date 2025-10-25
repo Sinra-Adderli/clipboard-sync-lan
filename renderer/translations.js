@@ -138,69 +138,69 @@ const translations = {
 	jp: {
 		// Заголовок
 		appTitle: 'ClipboardSync LAN',
-		statusConnected: '接続済み',
-		statusWaiting: '待機中',
-		statusDisconnected: '切断',
+		statusConnected: 'せつぞくずみ',
+		statusWaiting: 'たいきちゅう',
+		statusDisconnected: 'きれ',
 		
 		// Выбор режима
-		modeSelection: 'モード選択',
+		modeSelection: 'モードせんたく',
 		serverMode: 'サーバーモード',
 		clientMode: 'クライアントモード',
 		
 		// Настройки подключения
-		connectionSettings: '接続設定',
+		connectionSettings: 'せつぞくせってい',
 		password: 'パスワード',
-		passwordPlaceholder: '同期パスワードを作成',
-		serverIp: 'サーバーIP（自動検出の場合は任意）',
+		passwordPlaceholder: 'どうきパスワードをさくせい',
+		serverIp: 'サーバーIP（じどうけんしゅつのばあいはにんい）',
 		serverIpPlaceholder: '192.168.3.46',
-		startSync: '接続',
-		stopSync: '切断',
+		startSync: 'せつぞく',
+		stopSync: 'きれ',
 		
 		// Опции
 		options: 'オプション',
-		autoDiscovery: '自動検出',
-		fileSync: 'ファイル同期',
-		autoLaunch: '起動時に自動起動',
+		autoDiscovery: 'じどうけんしゅつ',
+		fileSync: 'ファイルどうき',
+		autoLaunch: 'きどうじにじどうきどう',
 		darkTheme: 'ダークテーマ',
-		language: '言語',
+		language: 'げんご',
 		
 		// Обнаруженные серверы
-		discoveredServers: '検出されたサーバー',
-		noServers: 'まだサーバーが検出されていません...',
-		useServer: '使用',
+		discoveredServers: 'けんしゅつされたサーバー',
+		noServers: 'まだサーバーがけんしゅつされていません...',
+		useServer: 'しよう',
 		
 		// История буфера обмена
-		clipboardHistory: 'クリップボード履歴',
+		clipboardHistory: 'クリップボードれきし',
 		clear: 'クリア',
-		noHistory: 'クリップボード履歴はまだありません...',
-		justNow: 'たった今',
-		minutesAgo: '分前',
-		hoursAgo: '時間前',
+		noHistory: 'クリップボードれきしはまだありません...',
+		justNow: 'たったいま',
+		minutesAgo: 'ふんまえ',
+		hoursAgo: 'じかんまえ',
 		
 		// Информация о подключении
-		connectionInfo: '接続情報',
+		connectionInfo: 'せつぞくじょうほう',
 		status: 'ステータス',
 		mode: 'モード',
-		connectedClients: '接続クライアント',
+		connectedClients: 'せつぞくクライアント',
 		server: 'サーバー',
-		running: '実行中',
-		notRunning: '停止中',
+		running: 'じっこうちゅう',
+		notRunning: 'ていしちゅう',
 		
 		// Сообщения
-		selectMode: 'モードを選択してください（サーバーまたはクライアント）',
-		enterPassword: 'パスワードを入力してください',
-		syncStarted: '同期が開始されました',
-		syncStopped: '同期が停止されました',
-		failedToStart: '開始に失敗しました',
-		failedToStop: '停止に失敗しました',
+		selectMode: 'モードをせんたくしてください（サーバーまたはクライアント）',
+		enterPassword: 'パスワードをにゅうりょくしてください',
+		syncStarted: 'どうきがかいしされました',
+		syncStopped: 'どうきがていしされました',
+		failedToStart: 'かいしにしっぱいしました',
+		failedToStop: 'ていしにしっぱいしました',
 		copiedToClipboard: 'クリップボードにコピーされました',
-		clearHistoryConfirm: 'クリップボード履歴をクリアしてもよろしいですか？',
-		clipboardReceived: 'クリップボードを受信しました：',
-		fileReceived: 'ファイルを受信しました：',
-		clientConnected: 'クライアントが接続しました',
-		clientDisconnected: 'クライアントが切断しました'
+		clearHistoryConfirm: 'クリップボードれきしをクリアしてもよろしいですか？',
+		clipboardReceived: 'クリップボードをじゅしんしました：',
+		fileReceived: 'ファイルをじゅしんしました：',
+		clientConnected: 'クライアントがせつぞくしました',
+		clientDisconnected: 'クライアントがきれました'
 	}
-};
+};	
 
 // Экспорт
 if (typeof module !== 'undefined' && module.exports) {

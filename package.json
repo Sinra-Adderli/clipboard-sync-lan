@@ -1,6 +1,6 @@
 {
 	"name": "clipboard-sync-lan",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Cross-platform clipboard and file synchronization over LAN using Electron",
 	"main": "main.js",
 	"type": "commonjs",
