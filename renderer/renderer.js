@@ -108,6 +108,10 @@ class RendererApp {
 			this.currentLang = lang;
 			this.updateAllTranslations();
 			this.saveSettings();
+			// Сообщаем main о смене языка для обновления трея
+			ipcRenderer.invoke('set-language', this.currentLang);
+			// Обновляем статус, чтобы подтянулись переводы Connected/Waiting/Disconnected
+			this.updateStatus();
 		}
 	}
 	

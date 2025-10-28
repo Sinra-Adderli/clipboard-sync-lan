@@ -32,6 +32,10 @@ const translations = {
 		darkTheme: 'Dark Theme',
 		language: 'Language',
 		
+		// Трей
+		trayShowWindow: 'Show Window',
+		trayQuit: 'Quit',
+		
 		// Обнаруженные серверы
 		discoveredServers: 'Discovered Servers',
 		noServers: 'No servers discovered yet...',
@@ -97,6 +101,10 @@ const translations = {
 		autoLaunch: 'Автозапуск при старте системы',
 		darkTheme: 'Темная тема',
 		language: 'Язык',
+
+		// Трей
+		trayShowWindow: 'Показать окно',
+		trayQuit: 'Выйти',
 		
 		// Обнаруженные серверы
 		discoveredServers: 'Найденные серверы',
@@ -163,6 +171,10 @@ const translations = {
 		autoLaunch: 'きどうじにじどうきどう',
 		darkTheme: 'ダークテーマ',
 		language: 'げんご',
+
+		// Трей
+		trayShowWindow: 'ウィンドウを表示',
+		trayQuit: '終了',
 		
 		// Обнаруженные серверы
 		discoveredServers: 'けんしゅつされたサーバー',

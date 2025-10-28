@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const translations = require('./renderer/translations');
 const notifier = require('node-notifier');
 
 const Config = require('./src/config');
@@ -33,6 +34,7 @@ class ClipboardSyncApp {
 		this.autoDiscovery = true;
 		this.preferences = { lastMode: null, lastPassword: '', lastServerHost: '' };
 		this.prefsPath = path.join(app.getPath('userData'), 'preferences.json');
+		this.currentLanguage = 'en';
 	}
 
 	loadPreferences() {
@@ -263,9 +265,10 @@ class ClipboardSyncApp {
 	 * Обновляет меню трея
 	 */
 	updateTrayMenu() {
+		const lang = translations[this.currentLanguage] || translations.en;
 		const contextMenu = Menu.buildFromTemplate([
 			{
-				label: 'Show Window',
+				label: lang.trayShowWindow || 'Show Window',
 				click: () => {
 					if (!this.mainWindow || this.mainWindow.isDestroyed()) {
 						this.createWindow();
@@ -277,7 +280,7 @@ class ClipboardSyncApp {
 			},
 			{ type: 'separator' },
 			{
-				label: 'Quit',
+				label: lang.trayQuit || 'Quit',
 				click: () => {
 					this.cleanup();
 					app.quit();
@@ -286,7 +289,8 @@ class ClipboardSyncApp {
 		]);
 		
 		this.tray.setContextMenu(contextMenu);
-		this.tray.setToolTip(`ClipboardSync - ${this.isRunning ? 'Running' : 'Stopped'}`);
+		const runningText = (translations[this.currentLanguage] || translations.en)[this.isRunning ? 'running' : 'notRunning'] || (this.isRunning ? 'Running' : 'Not running');
+		this.tray.setToolTip(`ClipboardSync - ${runningText}`);
 	}
 	
 	/**
@@ -385,6 +389,16 @@ class ClipboardSyncApp {
 		ipcMain.handle('toggle-fullscreen', async () => {
 			this.mainWindow.setFullScreen(!this.mainWindow.isFullScreen());
 			return true;
+		});
+
+		// Set UI language from renderer (affects tray)
+		ipcMain.handle('set-language', async (event, lang) => {
+			if (lang && translations[lang]) {
+				this.currentLanguage = lang;
+				this.updateTrayMenu();
+				return true;
+			}
+			return false;
 		});
 	}
 	
