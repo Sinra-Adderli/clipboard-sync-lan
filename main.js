@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
+const path = require('path');
 const notifier = require('node-notifier');
 
 const Config = require('./src/config');
@@ -41,6 +42,10 @@ class ClipboardSyncApp {
 		app.on('activate', () => {
 			if (BrowserWindow.getAllWindows().length === 0) {
 				this.createWindow();
+			} else if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+				// Показываем окно при клике на иконку в Dock
+				this.mainWindow.show();
+				this.mainWindow.focus();
 			}
 		});
 		});
@@ -61,16 +66,24 @@ class ClipboardSyncApp {
 	 * Создает главное окно
 	 */
 	createWindow() {
-		// Загружаем иконку для окна
-		let windowIcon;
+		// Загружаем иконку для окна (переподбор по платформе)
+		let windowIcon = null;
 		try {
-			windowIcon = nativeImage.createFromPath('assets/icon.ico');
-			if (windowIcon.isEmpty()) {
-				windowIcon = null;
+			let iconPath;
+			if (process.platform === 'win32') {
+				iconPath = path.join(__dirname, 'assets', 'icon.ico');
+			} else if (process.platform === 'darwin') {
+				iconPath = path.join(__dirname, 'assets', 'icon.icns');
+			} else {
+				// linux и прочие — предпочтительно PNG, если появится в assets
+				iconPath = path.join(__dirname, 'assets', 'icon.png');
+			}
+			const candidate = nativeImage.createFromPath(iconPath);
+			if (!candidate.isEmpty()) {
+				windowIcon = candidate;
 			}
 		} catch (error) {
 			console.warn('Failed to load window icon:', error);
-			windowIcon = null;
 		}
 
 		this.mainWindow = new BrowserWindow({
@@ -134,43 +147,88 @@ class ClipboardSyncApp {
 	 * Создает иконку системного трея
 	 */
 	createTray() {
-		// Создаем иконку трея из файла
-		let icon;
+		// Создаем иконку трея из файла (переподбор по платформе)
+		let trayImage;
 		try {
-			// Пытаемся загрузить иконку из assets
-			icon = nativeImage.createFromPath('assets/icon.ico');
-			if (icon.isEmpty()) {
-				// Если не удалось загрузить, создаем простую иконку
-				icon = nativeImage.createFromBuffer(Buffer.from(`
-					<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">
-						<rect width="16" height="16" fill="#4CAF50"/>
-						<text x="8" y="12" text-anchor="middle" fill="white" font-size="10" font-family="Arial">C</text>
-					</svg>
-				`));
+			let trayIconPath;
+			if (process.platform === 'win32') {
+				trayIconPath = path.join(__dirname, 'assets', 'icon.ico');
+				trayImage = nativeImage.createFromPath(trayIconPath);
+			} else if (process.platform === 'darwin') {
+				const icnsPath = path.join(__dirname, 'assets', 'icon.icns');
+				let img = nativeImage.createFromPath(icnsPath);
+				if (!img.isEmpty()) {
+					img = img.resize({ width: 18, height: 18 });
+					img.setTemplateImage(true);
+					trayImage = img;
+				}
+				// Если не удалось — попробуем PNG, если добавите его в assets
+				if (!trayImage || trayImage.isEmpty()) {
+					const pngPath = path.join(__dirname, 'assets', 'icon.png');
+					const png = nativeImage.createFromPath(pngPath);
+					if (!png.isEmpty()) {
+						png.setTemplateImage(true);
+						trayImage = png.resize({ width: 18, height: 18 });
+					}
+				}
+			} else {
+				// Linux и прочие — PNG
+				const pngPath = path.join(__dirname, 'assets', 'icon.png');
+				trayImage = nativeImage.createFromPath(pngPath);
+			}
+
+			if (!trayImage || trayImage.isEmpty()) {
+				// Фоллбек примитивная иконка
+				trayImage = nativeImage.createFromDataURL(
+					'data:image/svg+xml;utf8,' +
+					encodeURIComponent(
+						'<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">\n' +
+						'<rect width="16" height="16" fill="#4CAF50"/>\n' +
+						'<text x="8" y="12" text-anchor="middle" fill="white" font-size="10" font-family="Arial">C</text>\n' +
+						'</svg>'
+					)
+				);
 			}
 		} catch (error) {
 			console.warn('Failed to load tray icon:', error);
-			// Создаем простую иконку как fallback
-			icon = nativeImage.createFromBuffer(Buffer.from(`
-				<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">
-					<rect width="16" height="16" fill="#4CAF50"/>
-					<text x="8" y="12" text-anchor="middle" fill="white" font-size="10" font-family="Arial">C</text>
-				</svg>
-			`));
+			trayImage = nativeImage.createFromDataURL(
+				'data:image/svg+xml;utf8,' +
+				encodeURIComponent(
+					'<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">\n' +
+					'<rect width="16" height="16" fill="#4CAF50"/>\n' +
+					'<text x="8" y="12" text-anchor="middle" fill="white" font-size="10" font-family="Arial">C</text>\n' +
+					'</svg>'
+				)
+			);
 		}
-		this.tray = new Tray(icon);
+
+		this.tray = new Tray(trayImage);
 		
 		this.updateTrayMenu();
 		
-		this.tray.on('click', () => {
-		if (this.mainWindow) {
-			if (this.mainWindow.isVisible()) {
-				this.mainWindow.hide();
-			} else {
-				this.mainWindow.show();
-			}
+		// Поведение клика по трею по платформам
+		if (process.platform === 'darwin') {
+			// На macOS по левому клику открываем только контекстное меню
+			this.tray.setIgnoreDoubleClickEvents(true);
+			this.tray.on('click', () => {
+				this.tray.popUpContextMenu();
+			});
+		} else {
+			// На Windows/Linux левый клик — показать/скрыть окно
+			this.tray.on('click', () => {
+				if (this.mainWindow) {
+					if (this.mainWindow.isVisible()) {
+						this.mainWindow.hide();
+					} else {
+						this.mainWindow.show();
+					}
+				}
+			});
+			// Правый клик — контекстное меню
+			this.tray.on('right-click', () => {
+				this.tray.popUpContextMenu();
+			});
 		}
-		});
 	}
 	
 	/**
@@ -178,23 +236,17 @@ class ClipboardSyncApp {
 	 */
 	updateTrayMenu() {
 		const contextMenu = Menu.buildFromTemplate([
-			{
-				label: this.isRunning ? 'Stop Sync' : 'Start Sync',
-				click: () => {
-					if (this.isRunning) {
-						this.stopSync();
-					} else {
-						this.mainWindow.show();
-					}
-				}
-			},
-			{
-				label: 'Show Window',
-				click: () => {
+		{
+			label: 'Show Window',
+			click: () => {
+				if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+					this.createWindow();
+				} else {
 					this.mainWindow.show();
 					this.mainWindow.focus();
 				}
-			},
+			}
+		},
 			{ type: 'separator' },
 			{
 				label: 'Quit',
