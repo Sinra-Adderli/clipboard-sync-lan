@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const notifier = require('node-notifier');
 
 const Config = require('./src/config');
@@ -30,6 +31,30 @@ class ClipboardSyncApp {
 		this.isRunning = false;
 		this.password = this.config.DEFAULT_PASSWORD;
 		this.autoDiscovery = true;
+		this.preferences = { lastMode: null, lastPassword: '', lastServerHost: '' };
+		this.prefsPath = path.join(app.getPath('userData'), 'preferences.json');
+	}
+
+	loadPreferences() {
+		try {
+			if (fs.existsSync(this.prefsPath)) {
+				const raw = fs.readFileSync(this.prefsPath, 'utf-8');
+				const parsed = JSON.parse(raw);
+				this.preferences = Object.assign({ lastMode: null, lastPassword: '', lastServerHost: '' }, parsed);
+			}
+		} catch (error) {
+			console.warn('Failed to load preferences:', error);
+		}
+	}
+
+	savePreferences(patch) {
+		try {
+			this.preferences = Object.assign({}, this.preferences, patch || {});
+			fs.writeFileSync(this.prefsPath, JSON.stringify(this.preferences, null, 2), 'utf-8');
+			this.sendToRenderer('preferences-updated', this.preferences);
+		} catch (error) {
+			console.warn('Failed to save preferences:', error);
+		}
 	}
 	
 	init() {
@@ -38,6 +63,7 @@ class ClipboardSyncApp {
 		this.createWindow();
 		this.createTray();
 		this.setupIPC();
+		this.loadPreferences();
 		
 		app.on('activate', () => {
 			if (BrowserWindow.getAllWindows().length === 0) {
@@ -113,6 +139,8 @@ class ClipboardSyncApp {
 		// Показываем окно после загрузки
 		this.mainWindow.once('ready-to-show', () => {
 			this.mainWindow.show();
+			// Отправляем сохраненные предпочтения в рендерер
+			this.sendToRenderer('preferences-updated', this.preferences);
 		});
 		
 		this.mainWindow.on('close', (event) => {
@@ -236,17 +264,17 @@ class ClipboardSyncApp {
 	 */
 	updateTrayMenu() {
 		const contextMenu = Menu.buildFromTemplate([
-		{
-			label: 'Show Window',
-			click: () => {
-				if (!this.mainWindow || this.mainWindow.isDestroyed()) {
-					this.createWindow();
-				} else {
-					this.mainWindow.show();
-					this.mainWindow.focus();
+			{
+				label: 'Show Window',
+				click: () => {
+					if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+						this.createWindow();
+					} else {
+						this.mainWindow.show();
+						this.mainWindow.focus();
+					}
 				}
-			}
-		},
+			},
 			{ type: 'separator' },
 			{
 				label: 'Quit',
@@ -321,6 +349,23 @@ class ClipboardSyncApp {
 			});
 			return true;
 		});
+
+		// Get auto-launch state
+		ipcMain.handle('get-auto-launch', async () => {
+			const settings = app.getLoginItemSettings();
+			return settings.openAtLogin === true;
+		});
+
+		// Preferences: get
+		ipcMain.handle('get-preferences', async () => {
+			return this.preferences;
+		});
+
+		// Preferences: save (optional external caller)
+		ipcMain.handle('save-preferences', async (event, patch) => {
+			this.savePreferences(patch || {});
+			return true;
+		});
 		
 		// Get discovered servers
 		ipcMain.handle('get-discovered-servers', async () => {
@@ -367,6 +412,12 @@ class ClipboardSyncApp {
 			this.isRunning = true;
 			this.updateTrayMenu();
 			this.sendToRenderer('status-changed', this.getStatus());
+			// Сохраняем предпочтения последнего запуска
+			this.savePreferences({
+				lastMode: this.mode,
+				lastPassword: this.password,
+				lastServerHost: options.serverHost || ''
+			});
 			
 			return { success: true };
 		} catch (error) {

@@ -22,8 +22,8 @@ class RendererApp {
 		this.updateStatus();
 		this.loadHistory();
 		
-		// Выбираем режим сервера по умолчанию
-		this.selectMode('server');
+		// Инициализация автостарта и пользовательских предпочтений из main
+		this.initializeFromMain();
 	}
 	
 	/**
@@ -248,6 +248,48 @@ class RendererApp {
 		ipcRenderer.on('client-disconnected', (event, data) => {
 			this.showNotification(`${this.t('clientDisconnected')}: ${data.clientId}`);
 		});
+	}
+
+	/**
+	 * Инициализирует состояние из main-процесса (автозапуск, предпочтения)
+	 */
+	async initializeFromMain() {
+		try {
+			// Инициализация тумблера автозапуска по фактическому состоянию системы
+			const autoLaunch = await ipcRenderer.invoke('get-auto-launch');
+			const autoLaunchToggle = document.getElementById('autoLaunchToggle');
+			if (autoLaunchToggle) autoLaunchToggle.checked = !!autoLaunch;
+
+			// Загрузка предпочтений
+			const prefs = await ipcRenderer.invoke('get-preferences');
+			this.applyPreferences(prefs);
+		} catch (error) {
+			console.error('Failed to initialize from main:', error);
+			// Выбираем режим сервера по умолчанию в случае ошибки
+			this.selectMode('server');
+		}
+	}
+
+	/**
+	 * Применяет полученные из main предпочтения к UI
+	 * @param {{lastMode:string|null,lastPassword:string,lastServerHost:string}} prefs
+	 */
+	applyPreferences(prefs) {
+		const passwordInput = document.getElementById('passwordInput');
+		const serverHostInput = document.getElementById('serverHostInput');
+		
+		if (passwordInput && typeof prefs?.lastPassword === 'string') {
+			passwordInput.value = prefs.lastPassword;
+		}
+		if (serverHostInput && typeof prefs?.lastServerHost === 'string') {
+			serverHostInput.value = prefs.lastServerHost;
+		}
+		
+		if (prefs && (prefs.lastMode === 'server' || prefs.lastMode === 'client')) {
+			this.selectMode(prefs.lastMode);
+		} else {
+			this.selectMode('server');
+		}
 	}
 	
 	/**
